@@ -9,7 +9,15 @@
 // ================================================================
 // SUPABASE CLIENT
 // ================================================================
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let _supabase;
+try {
+  if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL) {
+    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (e) {
+  console.error('Supabase init error:', e);
+  _supabase = null;
+}
 
 // Client com service role (owner pode criar/remover usuários)
 let _supabaseAdmin = null;
@@ -166,6 +174,11 @@ async function loginUser(e) {
   const password = document.getElementById('loginPassword').value;
   const btn      = document.getElementById('loginBtn');
   const errEl    = document.getElementById('loginError');
+
+  if (!_supabase) {
+    errEl.textContent = '⚠️ Credenciais não configuradas. Verifique supabase-config.js.';
+    return;
+  }
 
   errEl.textContent = '';
   btn.disabled  = true;

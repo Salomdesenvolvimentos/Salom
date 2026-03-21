@@ -16,8 +16,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-logo">
-        <img src="logo.png" alt="Salom" height="45" onerror="this.style.display='none'">
-        <span class="login-brand">SALOM</span>
+        <img src="logo.png" alt="Salom" height="72" onerror="this.style.display='none'">
       </div>
       <h2 class="login-title">Bem-vindo ao Portal</h2>
       <p class="login-subtitle">Acesse sua conta para continuar</p>
@@ -922,7 +921,13 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script>
+  /* Padrões — sobrescritos pelo supabase-config.js quando disponível */
+  var SUPABASE_URL = '';
+  var SUPABASE_ANON_KEY = '';
+  var SUPABASE_SERVICE_KEY = '';
+</script>
+<script src="supabase-config.js" onerror="document.getElementById('loginError').textContent='\u26a0\ufe0f supabase-config.js n\u00e3o encontrado. Abra o app localmente com o arquivo de configura\u00e7\u00e3o presente.'"></script>
 <script src="app.js"></script>
 </body>
 </html>
