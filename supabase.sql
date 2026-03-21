@@ -81,6 +81,13 @@ UPDATE public.profiles SET role = 'employee' WHERE role = 'admin';
 -- Adicionar coluna de permissões (segura para re-executar)
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '{}';
 
+-- Função SECURITY DEFINER: lê role sem passar pelas RLS (evita recursão infinita)
+CREATE OR REPLACE FUNCTION public.current_user_role()
+RETURNS TEXT LANGUAGE sql SECURITY DEFINER STABLE
+SET search_path = public AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
+
 DROP POLICY IF EXISTS "profiles_select_own"   ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update_own"   ON public.profiles;
 DROP POLICY IF EXISTS "profiles_insert_own"   ON public.profiles;
@@ -89,7 +96,7 @@ CREATE POLICY "profiles_select_own"   ON public.profiles FOR SELECT USING (auth.
 CREATE POLICY "profiles_update_own"   ON public.profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "profiles_insert_own"   ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_admin_select" ON public.profiles FOR SELECT
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'employee')));
+  USING (public.current_user_role() IN ('owner', 'employee'));
 
 -- Trigger: criar perfil automaticamente ao registrar usuário
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -145,7 +152,7 @@ ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "clients_admin_all"  ON public.clients;
 DROP POLICY IF EXISTS "clients_select_own" ON public.clients;
 CREATE POLICY "clients_admin_all"   ON public.clients FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'employee')));
+  USING (public.current_user_role() IN ('owner', 'employee'));
 CREATE POLICY "clients_select_own"  ON public.clients FOR SELECT USING (user_id = auth.uid());
 
 -- ================================================================
@@ -177,7 +184,7 @@ DROP POLICY IF EXISTS "tickets_admin_all"     ON public.tickets;
 DROP POLICY IF EXISTS "tickets_client_select" ON public.tickets;
 DROP POLICY IF EXISTS "tickets_client_insert" ON public.tickets;
 CREATE POLICY "tickets_admin_all"     ON public.tickets FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'employee')));
+  USING (public.current_user_role() IN ('owner', 'employee'));
 CREATE POLICY "tickets_client_select" ON public.tickets FOR SELECT
   USING (
     client_id IN (SELECT id FROM public.clients WHERE user_id = auth.uid())
@@ -240,7 +247,7 @@ ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "contracts_admin_all"     ON public.contracts;
 DROP POLICY IF EXISTS "contracts_client_select" ON public.contracts;
 CREATE POLICY "contracts_admin_all"    ON public.contracts FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'employee')));
+  USING (public.current_user_role() IN ('owner', 'employee'));
 CREATE POLICY "contracts_client_select" ON public.contracts FOR SELECT
   USING (client_id IN (SELECT id FROM public.clients WHERE user_id = auth.uid()));
 
