@@ -922,12 +922,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  /* Padrões — sobrescritos pelo supabase-config.js quando disponível */
-  var SUPABASE_URL = '';
-  var SUPABASE_ANON_KEY = '';
-  var SUPABASE_SERVICE_KEY = '';
+  /* Credenciais públicas do projeto Supabase.
+     A ANON KEY é segura para ficar no código — é uma JWT client-side
+     protegida pelas políticas RLS do banco.
+     A SERVICE_KEY (bypass de RLS) fica apenas no supabase-config.js local. */
+  var SUPABASE_URL     = 'https://tqjuppgzugkpspzdykle.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxanVwcGd6dWdrcHNwemR5a2xlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzgwMTksImV4cCI6MjA4OTUxNDAxOX0.6dmCik_Yk0Y9I-mwiDTXVPTWr6QaSzyfJh3t_jcC1Rw';
+  var SUPABASE_SERVICE_KEY = ''; /* sobrescrito pelo supabase-config.js quando presente */
 </script>
-<script src="supabase-config.js" onerror="document.getElementById('loginError').textContent='\u26a0\ufe0f supabase-config.js n\u00e3o encontrado. Abra o app localmente com o arquivo de configura\u00e7\u00e3o presente.'"></script>
+<script src="supabase-config.js" onerror="void 0"></script>
 <script src="app.js"></script>
 </body>
 </html>
