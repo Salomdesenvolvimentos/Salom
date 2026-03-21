@@ -120,6 +120,12 @@ const DEFAULT_COLS = [
 // INIT
 // ================================================================
 document.addEventListener('DOMContentLoaded', async () => {
+  if (!_supabase) {
+    // supabase-config.js não carregou — mensagem já exibida pelo onerror do script
+    showLogin();
+    return;
+  }
+
   const { data: { session } } = await _supabase.auth.getSession();
   if (session) {
     await onSignedIn(session.user);
