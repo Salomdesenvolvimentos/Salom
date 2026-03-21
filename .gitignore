@@ -4,3 +4,6 @@ node_modules/
 *.log
 .env
 Thumbs.db
+
+# Credenciais Supabase — nunca commitar
+supabase-config.js

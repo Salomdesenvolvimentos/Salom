@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salom - Portal</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="app-body">
+
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-bg"><div class="grid-lines"></div></div>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="logo.png" alt="Salom" height="45" onerror="this.style.display='none'">
+        <span class="login-brand">SALOM</span>
+      </div>
+      <h2 class="login-title">Bem-vindo ao Portal</h2>
+      <p class="login-subtitle">Acesse sua conta para continuar</p>
+      <form id="loginForm" autocomplete="on">
+        <div class="form-group">
+          <label>E-mail</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="loginEmail" placeholder="seu@email.com" required autocomplete="email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-pwd" onclick="togglePassword()" tabindex="-1">
+              <i class="fas fa-eye" id="togglePwdIcon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="login-error" id="loginError"></div>
+        <button type="submit" class="btn btn-primary btn-full" id="loginBtn" onclick="loginUser(event)">
+          <i class="fas fa-sign-in-alt"></i> Entrar
+        </button>
+      </form>
+      <a href="index.html" class="back-to-site"><i class="fas fa-arrow-left"></i> Voltar ao site</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP PRINCIPAL ===================== -->
+<div id="appScreen" class="app-screen" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="logo.png" alt="Salom" height="32" onerror="this.style.display='none'">
+        <span class="sidebar-brand">SALOM</span>
+      </div>
+      <button class="sidebar-collapse-btn" onclick="toggleSidebar()" title="Recolher menu">
+        <i class="fas fa-chevron-left" id="sidebarChevron"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- Admin -->
+      <div id="adminNav">
+        <div class="nav-label">Principal</div>
+        <a class="nav-item" id="navItemDashboard" data-page="dashboard" onclick="navigateTo('dashboard')">
+          <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+        </a>
+        <a class="nav-item" id="navItemClients" data-page="clients" onclick="navigateTo('clients')">
+          <i class="fas fa-users"></i><span>Clientes</span>
+        </a>
+        <a class="nav-item" id="navItemTickets" data-page="tickets" onclick="navigateTo('tickets')">
+          <i class="fas fa-tasks"></i><span>Chamados</span>
+          <span class="nav-badge" id="ticketsBadge" style="display:none">0</span>
+        </a>
+        <a class="nav-item" id="navItemContracts" data-page="contracts" onclick="navigateTo('contracts')">
+          <i class="fas fa-file-contract"></i><span>Contratos</span>
+        </a>
+        <a class="nav-item" id="navItemSoftwares" data-page="softwares" onclick="navigateTo('softwares')">
+          <i class="fas fa-code"></i><span>Softwares</span>
+        </a>
+      </div>
+
+      <!-- Somente Owner -->
+      <div id="ownerNav" style="display:none">
+        <div class="nav-label">Equipe</div>
+        <a class="nav-item" id="navItemEmployees" data-page="employees" onclick="navigateTo('employees')">
+          <i class="fas fa-user-tie"></i><span>Funcionários</span>
+        </a>
+      </div>
+
+      <!-- Cliente -->
+      <div id="clientNav" style="display:none">
+        <div class="nav-label">Principal</div>
+        <a class="nav-item" data-page="my-tickets" onclick="navigateTo('my-tickets')">
+          <i class="fas fa-headset"></i><span>Meus Chamados</span>
+          <span class="nav-badge" id="myBadge" style="display:none">0</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Conta</div>
+      <a class="nav-item" data-page="profile" onclick="navigateTo('profile')">
+        <i class="fas fa-user-circle"></i><span>Meu Perfil</span>
+      </a>
+      <a class="nav-item" data-page="settings" onclick="navigateTo('settings')">
+        <i class="fas fa-cog"></i><span>Configurações</span>
+      </a>
+      <a class="nav-item nav-logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i><span>Sair</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="sidebar-avatar-wrap">
+        <img id="sidebarAvatar" src="assets/user-generic.svg" alt="Avatar" class="sidebar-avatar">
+      </div>
+      <div class="sidebar-user-info">
+        <span id="sidebarName" class="sidebar-name">Carregando...</span>
+        <span id="sidebarRole" class="sidebar-role">-</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main-wrapper" id="mainWrapper">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <!-- Notificações -->
+        <div class="notif-wrapper">
+          <button class="notif-btn" onclick="toggleNotifDropdown(event)">
+            <i class="fas fa-bell"></i>
+            <span class="notif-dot" id="notifDot" style="display:none"></span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-dropdown-header">
+              <span>Notificações</span>
+              <button onclick="markAllRead()">Marcar todas</button>
+            </div>
+            <div class="notif-list" id="notifList">
+              <div class="notif-empty"><i class="fas fa-bell-slash"></i><p>Sem notificações</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="header-user" onclick="navigateTo('profile')">
+          <img id="headerAvatar" src="assets/user-generic.svg" alt="Avatar" class="header-avatar">
+          <span id="headerName">-</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ÁREA DAS PÁGINAS -->
+    <main class="content-area">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div id="page-dashboard" class="page">
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info"><h3 id="statClients">0</h3><p>Clientes</p></div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+            <div class="stat-info"><h3 id="statOpen">0</h3><p>Chamados Abertos</p></div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
+            <div class="stat-info"><h3 id="statContracts">0</h3><p>Contratos Ativos</p></div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="stat-info"><h3 id="statOverdue">0</h3><p>Vencidos/Atrasados</p></div>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>Chamados Recentes</h3>
+              <button class="btn btn-sm btn-outline" onclick="navigateTo('tickets')">Ver todos</button>
+            </div>
+            <div id="recentTicketsList" class="recent-list"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-header"><h3>Chamados por Status</h3></div>
+            <div id="statusChart" class="status-chart-wrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CLIENTES ===== -->
+      <div id="page-clients" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="clientSearch" placeholder="Buscar clientes..." oninput="filterClients()">
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="openClientModal()">
+              <i class="fas fa-plus"></i> Novo Cliente
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="clientsTable">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Portfólio Vinculado</th>
+                <th class="col-actions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody">
+              <tr><td colspan="6" class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== CHAMADOS (Monday Grid) ===== -->
+      <div id="page-tickets" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="ticketSearch" placeholder="Buscar chamados..." oninput="filterTickets()">
+            </div>
+            <select id="filterStatus" class="filter-select" onchange="filterTickets()">
+              <option value="">Todos status</option>
+              <option value="não iniciado">Não Iniciado</option>
+              <option value="em andamento">Em Andamento</option>
+              <option value="pendente">Pendente</option>
+              <option value="suspenso">Suspenso</option>
+              <option value="cancelado">Cancelado</option>
+              <option value="concluído">Concluído</option>
+            </select>
+            <select id="filterType" class="filter-select" onchange="filterTickets()">
+              <option value="">Todos tipos</option>
+              <option value="bug">Bug</option>
+              <option value="desenvolvimento">Desenvolvimento</option>
+              <option value="atendimento">Atendimento</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-outline" onclick="toggleColManager()" title="Gerenciar colunas">
+              <i class="fas fa-columns"></i> Colunas
+            </button>
+            <button class="btn btn-primary" onclick="openTicketModal()">
+              <i class="fas fa-plus"></i> Novo Chamado
+            </button>
+          </div>
+        </div>
+
+        <!-- Painel gerenciador de colunas -->
+        <div class="col-manager-panel" id="colManagerPanel" style="display:none">
+          <div class="col-manager-header">
+            <span><i class="fas fa-columns"></i> Gerenciar Colunas</span>
+            <button onclick="toggleColManager()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="col-manager-body" id="colManagerBody"></div>
+          <div class="col-manager-footer">
+            <button class="btn btn-outline btn-sm" onclick="openCustomColModal()">
+              <i class="fas fa-plus"></i> Adicionar Coluna Personalizada
+            </button>
+          </div>
+        </div>
+
+        <!-- Grade Monday -->
+        <div class="monday-container">
+          <div class="monday-scroll" id="mondayScroll">
+            <table class="monday-table" id="mondayTable">
+              <thead id="mondayHead"></thead>
+              <tbody id="mondayBody">
+                <tr><td colspan="20" class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="monday-add-row" onclick="openTicketModal()">
+            <i class="fas fa-plus"></i> Adicionar item
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CONTRATOS ===== -->
+      <div id="page-contracts" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="contractSearch" placeholder="Buscar contratos..." oninput="filterContracts()">
+            </div>
+            <select id="filterContractStatus" class="filter-select" onchange="filterContracts()">
+              <option value="">Todos status</option>
+              <option value="ativo">Ativo</option>
+              <option value="pendente">Pendente</option>
+              <option value="expirado">Expirado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+            <select id="filterContractClient" class="filter-select" onchange="filterContracts()">
+              <option value="">Todos clientes</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="openContractModal()">
+              <i class="fas fa-plus"></i> Novo Contrato
+            </button>
+          </div>
+        </div>
+        <div class="contracts-grid" id="contractsGrid">
+          <div class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+        </div>
+      </div>
+
+      <!-- ===== SOFTWARES ===== -->
+      <div id="page-softwares" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="softwareSearch" placeholder="Buscar softwares..." oninput="filterSoftwares()">
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="openSoftwareModal()">
+              <i class="fas fa-plus"></i> Novo Software
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Versão</th>
+                <th>Descrição</th>
+                <th class="col-actions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="softwaresBody">
+              <tr><td colspan="4" class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== FUNCIONÁRIOS (Owner only) ===== -->
+      <div id="page-employees" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="employeeSearch" placeholder="Buscar funcionários..." oninput="filterEmployees()">
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-outline" onclick="openCreateUserModal('client')">
+              <i class="fas fa-user-plus"></i> Novo Acesso de Cliente
+            </button>
+            <button class="btn btn-primary" onclick="openCreateUserModal('employee')">
+              <i class="fas fa-user-tie"></i> Novo Funcionário
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap" style="overflow-x:auto">
+          <table class="data-table" id="employeesTable">
+            <thead>
+              <tr>
+                <th style="min-width:200px">Funcionário</th>
+                <th style="min-width:180px">E-mail</th>
+                <th style="min-width:130px">Telefone</th>
+                <th style="min-width:110px;text-align:center"><i class="fas fa-chart-pie"></i> Dashboard</th>
+                <th style="min-width:110px;text-align:center"><i class="fas fa-users"></i> Clientes</th>
+                <th style="min-width:110px;text-align:center"><i class="fas fa-tasks"></i> Chamados</th>
+                <th style="min-width:110px;text-align:center"><i class="fas fa-file-contract"></i> Contratos</th>
+                <th style="min-width:110px;text-align:center"><i class="fas fa-code"></i> Softwares</th>
+                <th style="min-width:80px" class="col-actions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="employeesBody">
+              <tr><td colspan="9" class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== PERFIL ===== -->
+      <div id="page-profile" class="page" style="display:none">
+        <div class="profile-wrap">
+          <div class="profile-card">
+            <div class="profile-avatar-section">
+              <div class="profile-avatar-ring">
+                <img id="profileAvatar" src="assets/user-generic.svg" alt="Avatar" class="profile-avatar-img">
+                <button class="avatar-change-btn" onclick="document.getElementById('avatarFileInput').click()" title="Trocar foto">
+                  <i class="fas fa-camera"></i>
+                </button>
+              </div>
+              <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
+              <p class="avatar-hint">Clique na câmera para trocar a foto</p>
+            </div>
+            <form id="profileForm" onsubmit="saveProfile(event)" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nome Completo</label>
+                  <input type="text" id="profileName" placeholder="Seu nome completo">
+                </div>
+                <div class="form-group">
+                  <label>E-mail</label>
+                  <input type="email" id="profileEmail" readonly class="input-readonly">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Telefone</label>
+                  <input type="tel" id="profilePhone" placeholder="(11) 91234-5678">
+                </div>
+                <div class="form-group">
+                  <label>Função no sistema</label>
+                  <input type="text" id="profileRoleDisplay" readonly class="input-readonly">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar Alterações
+              </button>
+            </form>
+
+            <div class="profile-divider"></div>
+
+            <div class="password-section">
+              <h3><i class="fas fa-key"></i> Alterar Senha</h3>
+              <form id="passwordForm" onsubmit="changePassword(event)" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Nova Senha</label>
+                    <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" minlength="6">
+                  </div>
+                  <div class="form-group">
+                    <label>Confirmar Nova Senha</label>
+                    <input type="password" id="confirmPassword" placeholder="Repita a senha">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-outline">
+                  <i class="fas fa-key"></i> Alterar Senha
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CONFIGURAÇÕES ===== -->
+      <div id="page-settings" class="page" style="display:none">
+        <div class="profile-wrap">
+          <div class="profile-card">
+            <h3 style="margin:0 0 20px;color:#e0e6f0"><i class="fas fa-shield-alt" style="color:#00ff88;margin-right:8px"></i>Segurança da Conta</h3>
+            <div class="password-section" style="border-top:none;padding-top:0;margin-top:0">
+              <form id="settingsPasswordForm" onsubmit="changeSettingsPassword(event)" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Nova Senha</label>
+                    <input type="password" id="settNewPassword" placeholder="Mínimo 6 caracteres" minlength="6">
+                  </div>
+                  <div class="form-group">
+                    <label>Confirmar Nova Senha</label>
+                    <input type="password" id="settConfirmPassword" placeholder="Repita a nova senha">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-key"></i> Alterar Senha
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MEUS CHAMADOS (Cliente) ===== -->
+      <div id="page-my-tickets" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="myTicketSearch" placeholder="Buscar chamados..." oninput="filterMyTickets()">
+            </div>
+            <select id="myFilterStatus" class="filter-select" onchange="filterMyTickets()">
+              <option value="">Todos status</option>
+              <option value="não iniciado">Não Iniciado</option>
+              <option value="em andamento">Em Andamento</option>
+              <option value="pendente">Pendente</option>
+              <option value="suspenso">Suspenso</option>
+              <option value="cancelado">Cancelado</option>
+              <option value="concluído">Concluído</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="openChamadoModal()">
+              <i class="fas fa-plus"></i> Abrir Chamado
+            </button>
+          </div>
+        </div>
+        <div class="chamados-list" id="chamadosList">
+          <div class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== MODAIS ===================== -->
+
+<!-- MODAL: Cliente -->
+<div id="clientModal" class="modal-overlay" onclick="overlayClose(event,'clientModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="clientModalTitle">Novo Cliente</h3>
+      <button class="modal-close" onclick="closeModal('clientModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="clientForm" onsubmit="saveClient(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome *</label>
+            <input type="text" id="clientName" required placeholder="Nome completo ou razão social">
+          </div>
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="clientType" required>
+              <option value="pessoal">Pessoal</option>
+              <option value="empresa">Empresa</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="tel" id="clientPhone" placeholder="(11) 91234-5678">
+          </div>
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="clientEmail" placeholder="cliente@email.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Endereço</label>
+          <input type="text" id="clientAddress" placeholder="Rua, número, cidade - Estado">
+        </div>
+        <div class="form-group">
+          <label>Observações</label>
+          <textarea id="clientNotes" rows="3" placeholder="Notas internas sobre o cliente"></textarea>
+        </div>
+        <input type="hidden" id="clientId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('clientModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Chamado/Ticket (Admin) -->
+<div id="ticketModal" class="modal-overlay" onclick="overlayClose(event,'ticketModal')">
+  <div class="modal-box modal-lg">
+    <div class="modal-header">
+      <h3 id="ticketModalTitle">Novo Chamado</h3>
+      <button class="modal-close" onclick="closeModal('ticketModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="ticketForm" onsubmit="saveTicket(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group form-flex-2">
+            <label>Tarefa *</label>
+            <input type="text" id="ticketTask" required placeholder="Descrição da tarefa ou chamado">
+          </div>
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="ticketType" required onchange="onTicketTypeChange()">
+              <option value="desenvolvimento">Desenvolvimento</option>
+              <option value="bug">Bug</option>
+              <option value="atendimento">Atendimento</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Software</label>
+            <select id="ticketSoftware">
+              <option value="">— Selecione —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cliente</label>
+            <select id="ticketClient">
+              <option value="">— Selecione —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status</label>
+            <select id="ticketStatus">
+              <option value="não iniciado">Não Iniciado</option>
+              <option value="em andamento">Em Andamento</option>
+              <option value="pendente">Pendente</option>
+              <option value="suspenso">Suspenso</option>
+              <option value="cancelado">Cancelado</option>
+              <option value="concluído">Concluído</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Responsável</label>
+            <select id="ticketResponsible">
+              <option value="">— Selecione —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prazo</label>
+            <input type="date" id="ticketDeadline">
+          </div>
+          <div class="form-group">
+            <label>Custo (R$)</label>
+            <input type="number" id="ticketCost" min="0" step="0.01" placeholder="0,00">
+          </div>
+        </div>
+        <div class="form-group" id="linkedChamadoGroup" style="display:none">
+          <label><i class="fas fa-link"></i> Chamado de Origem Vinculado</label>
+          <select id="ticketLinkedChamado">
+            <option value="">Nenhum</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Observação</label>
+          <textarea id="ticketObservation" rows="3" placeholder="Detalhes, contexto, links relevantes..."></textarea>
+        </div>
+        <input type="hidden" id="ticketId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('ticketModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Contrato -->
+<div id="contractModal" class="modal-overlay" onclick="overlayClose(event,'contractModal')">
+  <div class="modal-box modal-lg">
+    <div class="modal-header">
+      <h3 id="contractModalTitle">Novo Contrato</h3>
+      <button class="modal-close" onclick="closeModal('contractModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="contractForm" onsubmit="saveContract(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group form-flex-2">
+            <label>Título *</label>
+            <input type="text" id="contractTitle" required placeholder="Ex: Contrato de Desenvolvimento — Projeto X">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="contractStatus">
+              <option value="ativo">Ativo</option>
+              <option value="pendente">Pendente</option>
+              <option value="expirado">Expirado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Cliente *</label>
+            <select id="contractClient" required>
+              <option value="">— Selecione —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Valor (R$)</label>
+            <input type="number" id="contractValue" min="0" step="0.01" placeholder="0,00">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data de Início</label>
+            <input type="date" id="contractStart">
+          </div>
+          <div class="form-group">
+            <label>Data de Vencimento</label>
+            <input type="date" id="contractEnd">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Arquivo do Contrato</label>
+          <div class="file-drop-area" id="contractDropArea" onclick="document.getElementById('contractFileInput').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span id="contractFileName">Clique ou arraste o arquivo PDF/DOC aqui</span>
+          </div>
+          <input type="file" id="contractFileInput" accept=".pdf,.doc,.docx" style="display:none" onchange="onContractFileChange(event)">
+        </div>
+        <div class="form-group">
+          <label>Observações</label>
+          <textarea id="contractNotes" rows="3" placeholder="Notas sobre o contrato..."></textarea>
+        </div>
+        <input type="hidden" id="contractId">
+        <input type="hidden" id="contractExistingFile">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('contractModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Software -->
+<div id="softwareModal" class="modal-overlay" onclick="overlayClose(event,'softwareModal')">
+  <div class="modal-box modal-sm">
+    <div class="modal-header">
+      <h3 id="softwareModalTitle">Novo Software</h3>
+      <button class="modal-close" onclick="closeModal('softwareModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="softwareForm" onsubmit="saveSoftware(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome *</label>
+          <input type="text" id="softwareName" required placeholder="Nome do software">
+        </div>
+        <div class="form-group">
+          <label>Versão</label>
+          <input type="text" id="softwareVersion" placeholder="Ex: 1.0.0">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="softwareDescription" rows="3" placeholder="Descrição do software"></textarea>
+        </div>
+        <input type="hidden" id="softwareId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('softwareModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Coluna Personalizada -->
+<div id="customColModal" class="modal-overlay" onclick="overlayClose(event,'customColModal')">
+  <div class="modal-box modal-sm">
+    <div class="modal-header">
+      <h3>Adicionar Coluna Personalizada</h3>
+      <button class="modal-close" onclick="closeModal('customColModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="customColForm" onsubmit="saveCustomCol(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome da Coluna *</label>
+          <input type="text" id="customColName" required placeholder="Ex: Prioridade, Link, Referência">
+        </div>
+        <div class="form-group">
+          <label>Tipo de Dado *</label>
+          <select id="customColType" required>
+            <option value="string">Texto</option>
+            <option value="integer">Número Inteiro</option>
+            <option value="date">Data</option>
+            <option value="money">Dinheiro (R$)</option>
+          </select>
+        </div>
+        <p class="form-hint"><i class="fas fa-info-circle"></i> A coluna ficará disponível para todos os chamados e seus dados são armazenados individualmente por chamado.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('customColModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Adicionar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Abrir Chamado (Cliente) -->
+<div id="chamadoModal" class="modal-overlay" onclick="overlayClose(event,'chamadoModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Abrir Novo Chamado</h3>
+      <button class="modal-close" onclick="closeModal('chamadoModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="chamadoForm" onsubmit="saveChamado(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Assunto *</label>
+          <input type="text" id="chamadoTask" required placeholder="Descreva brevemente o problema ou solicitação">
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="chamadoType">
+            <option value="bug">Erro / Bug</option>
+            <option value="atendimento">Suporte / Atendimento</option>
+            <option value="desenvolvimento">Solicitação de Melhoria</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Detalhes *</label>
+          <textarea id="chamadoObservation" rows="5" required placeholder="Descreva o problema com detalhes: o que estava fazendo, o que aconteceu, qual era o resultado esperado..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('chamadoModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Enviar Chamado</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Detalhe do Chamado (Visualização) -->
+<div id="ticketDetailModal" class="modal-overlay" onclick="overlayClose(event,'ticketDetailModal')">
+  <div class="modal-box modal-lg">
+    <div class="modal-header">
+      <h3 id="detailModalTitle">Detalhes do Chamado</h3>
+      <button class="modal-close" onclick="closeModal('ticketDetailModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="ticketDetailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('ticketDetailModal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Criar Usuário (somente Owner) -->
+<div id="createUserModal" class="modal-overlay" onclick="overlayClose(event,'createUserModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="createUserTitle">Novo Funcionário</h3>
+      <button class="modal-close" onclick="closeModal('createUserModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="createUserForm" onsubmit="createUser(event)" novalidate>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome Completo *</label>
+            <input type="text" id="newUserName" required placeholder="Nome do usuário">
+          </div>
+          <div class="form-group">
+            <label>Função *</label>
+            <select id="newUserRole" onchange="onCreateUserRoleChange()">
+              <option value="employee">Funcionário</option>
+              <option value="client">Cliente</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>E-mail *</label>
+            <input type="email" id="newUserEmail" required placeholder="email@exemplo.com">
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="tel" id="newUserPhone" placeholder="(11) 91234-5678">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Senha *</label>
+          <input type="password" id="newUserPassword" required placeholder="Mínimo 6 caracteres" minlength="6">
+        </div>
+
+        <!-- Permissões (somente para Funcionário) -->
+        <div id="newUserPermBlock">
+          <div class="profile-divider" style="margin:16px 0"></div>
+          <p style="color:#b0b8d4;font-size:13px;margin-bottom:12px">
+            <i class="fas fa-shield-alt" style="color:#00ff88"></i>
+            Permissões de acesso às telas:
+          </p>
+          <div id="newUserPermsGrid" class="perms-grid"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createUserModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="createUserBtn">
+          <i class="fas fa-user-plus"></i> Criar Usuário
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Confirmação de Exclusão -->
+<div id="confirmModal" class="modal-overlay" onclick="overlayClose(event,'confirmModal')">
+  <div class="modal-box modal-sm">
+    <div class="modal-header">
+      <h3>Confirmar Exclusão</h3>
+      <button class="modal-close" onclick="closeModal('confirmModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage">Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')">Cancelar</button>
+      <button class="btn btn-danger" id="confirmActionBtn"><i class="fas fa-trash"></i> Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup status (Monday inline) -->
+<div id="statusPopup" class="status-popup" style="display:none"></div>
+
+<!-- Container de toasts -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
