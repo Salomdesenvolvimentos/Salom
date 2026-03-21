@@ -30,7 +30,7 @@
 // No arquivo index.html, busque e substitua:
 
 Email: contato@salom.com.br → seuemail@empresa.com.br
-Telefone: (11) 98765-4321 → seu telefone
+Telefone: (11) 91324-0090 → seu telefone
 Endereço: São Paulo, SP → sua cidade
 
 // =====================================================
@@ -38,13 +38,13 @@ Endereço: São Paulo, SP → sua cidade
 // =====================================================
 
 // No arquivo script.js, linha ~115:
-const whatsappNumber = '5511987654321'; // Altere para seu número
+const whatsappNumber = '5511913240090'; // Altere para seu número
 
 // No arquivo index.html, linha ~660:
-<a href="https://wa.me/5511987654321..." // Altere o número
+<a href="https://wa.me/5511913240090..." // Altere o número
 
 // Formato: código do país (55) + DDD + número
-// Exemplo: 5511987654321 = +55 (11) 98765-4321
+// Exemplo: 5511913240090 = +55 (11) 91324-0090
 
 // =====================================================
 // 4. ADICIONAR SUAS PRÓPRIAS IMAGENS
@@ -263,6 +263,6 @@ const suffixes = ['+', '%', '+'];   // Altere os sufixos
 
 /*
    Precisa de ajuda? Entre em contato:
-   📧 Email: contato@salom.com.br
-   📱 WhatsApp: (11) 98765-4321
+    📧 Email: contato@salom.com.br
+    📱 WhatsApp: (11) 91324-0090
 */

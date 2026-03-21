@@ -176,7 +176,7 @@ if (quoteForm) {
             quoteForm.reset();
             
             // Opcional: Redirecionar para WhatsApp
-            const whatsappNumber = '5511987654321'; // Substitua pelo número real
+            const whatsappNumber = '5511913240090'; // Substitua pelo número real
             const message = `Olá! Gostaria de solicitar um orçamento para: ${formData.tipo}\n\nNome: ${formData.nome}\nEmail: ${formData.email}\n\nDescrição: ${formData.descricao}`;
             const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
             

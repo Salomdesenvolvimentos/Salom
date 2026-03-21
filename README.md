@@ -80,8 +80,8 @@ Edite as variáveis CSS em `styles.css`:
 ### Informações de Contato
 Edite no `index.html`:
 - Email: Busque por `contato@salom.com.br`
-- Telefone: Busque por `(11) 98765-4321`
-- WhatsApp: Busque por `5511987654321`
+- Telefone: Busque por `(11) 91324-0090`
+- WhatsApp: Busque por `5511913240090`
 
 ### Conteúdo
 - **Estatísticas**: Edite os números na seção hero
@@ -93,12 +93,12 @@ Edite no `index.html`:
 
 No arquivo `script.js`, atualize o número do WhatsApp:
 ```javascript
-const whatsappNumber = '5511987654321'; // Formato: código país + DDD + número
+const whatsappNumber = '5511913240090'; // Formato: código país + DDD + número
 ```
 
 No HTML, atualize o link do botão flutuante:
 ```html
-<a href="https://wa.me/5511987654321?text=Olá!..." class="whatsapp-float">
+<a href="https://wa.me/5511913240090?text=Olá!..." class="whatsapp-float">
 ```
 
 ## 📧 Configuração do Formulário
@@ -211,7 +211,7 @@ Para melhorar:
 
 Para dúvidas ou suporte:
 - 📧 Email: contato@salom.com.br
-- 📱 WhatsApp: (11) 98765-4321
+- 📱 WhatsApp: (11) 91324-0090
 
 ## 📄 Licença
 
