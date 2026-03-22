@@ -469,10 +469,23 @@
                             <label for="descricao">Descrição do Projeto *</label>
                             <textarea id="descricao" name="descricao" rows="5" placeholder="Conte-nos sobre seu projeto, objetivos e necessidades..." required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-full">
+                        <button type="submit" class="btn btn-primary btn-full" id="quoteSubmitBtn">
                             <i class="fas fa-paper-plane"></i> Solicitar Projeto
                         </button>
                     </form>
+
+                    <!-- Tela de sucesso (oculta por default) -->
+                    <div id="quoteSucesso" style="display:none;text-align:center;padding:48px 24px">
+                        <div style="font-size:64px;margin-bottom:16px">✅</div>
+                        <h3 style="color:#00ff88;margin-bottom:12px;font-size:1.6rem">Solicitação Enviada!</h3>
+                        <p style="color:#a0aec0;font-size:1rem;line-height:1.6;margin-bottom:24px">
+                            Recebemos seu orçamento com sucesso.<br>
+                            Nossa equipe entrará em contato em breve pelo e-mail ou WhatsApp informado.
+                        </p>
+                        <button class="btn btn-secondary" onclick="document.getElementById('quoteSucesso').style.display='none';document.getElementById('quoteForm').style.display=''">
+                            <i class="fas fa-plus"></i> Novo orçamento
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -590,6 +603,7 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>

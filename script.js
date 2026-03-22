@@ -7,6 +7,12 @@ const scrollTopBtn = document.getElementById('scrollTop');
 const quoteForm = document.getElementById('quoteForm');
 const navbar = document.querySelector('.navbar');
 
+// Supabase (ANON key — seguro pois os dados de quotes são protegidos por RLS)
+const _sb = window.supabase ? window.supabase.createClient(
+  'https://tqjuppgzugkpspzdykle.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxanVwcGd6dWdrcHNwemR5a2xlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MzgwMTksImV4cCI6MjA4OTUxNDAxOX0.6dmCik_Yk0Y9I-mwiDTXVPTWr6QaSzyfJh3t_jcC1Rw'
+) : null;
+
 // ========================================
 // MENU RESPONSIVO
 // ========================================
@@ -142,17 +148,17 @@ window.addEventListener('resize', () => {
 // VALIDAÇÃO E ENVIO DO FORMULÁRIO
 // ========================================
 if (quoteForm) {
-    quoteForm.addEventListener('submit', (e) => {
+    quoteForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         // Capturar dados do formulário
         const formData = {
-            nome: document.getElementById('nome').value,
-            empresa: document.getElementById('empresa').value,
-            whatsapp: document.getElementById('whatsapp').value,
-            email: document.getElementById('email').value,
-            tipo: document.getElementById('tipo').value,
-            descricao: document.getElementById('descricao').value
+            nome:      document.getElementById('nome').value.trim(),
+            empresa:   document.getElementById('empresa').value.trim(),
+            whatsapp:  document.getElementById('whatsapp').value.trim(),
+            email:     document.getElementById('email').value.trim(),
+            tipo:      document.getElementById('tipo').value,
+            descricao: document.getElementById('descricao').value.trim()
         };
         
         // Validação básica
@@ -167,22 +173,22 @@ if (quoteForm) {
             showNotification('Por favor, insira um email válido.', 'error');
             return;
         }
-        
-        // Simular envio (aqui você pode integrar com backend)
-        showNotification('Enviando sua solicitação...', 'info');
-        
-        setTimeout(() => {
-            showNotification('Solicitação enviada com sucesso! Entraremos em contato em breve.', 'success');
-            quoteForm.reset();
-            
-            // Opcional: Redirecionar para WhatsApp
-            const whatsappNumber = '5511913240090'; // Substitua pelo número real
-            const message = `Olá! Gostaria de solicitar um orçamento para: ${formData.tipo}\n\nNome: ${formData.nome}\nEmail: ${formData.email}\n\nDescrição: ${formData.descricao}`;
-            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-            
-            // Descomentar para abrir WhatsApp automaticamente
-            // window.open(whatsappUrl, '_blank');
-        }, 1500);
+
+        const btn = document.getElementById('quoteSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        // Salvar no banco Supabase
+        if (_sb) {
+            await _sb.from('quotes').insert(formData);
+        }
+
+        // Mostrar tela de sucesso
+        quoteForm.style.display = 'none';
+        quoteForm.reset();
+        document.getElementById('quoteSucesso').style.display = '';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Solicitar Projeto';
     });
 }
 

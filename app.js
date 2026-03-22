@@ -67,11 +67,12 @@ const TYPE_CFG = {
 
 // Configuração de permissões de tela
 const PERMISSIONS_CFG = {
-  dashboard:  { label: 'Dashboard',  icon: 'fa-chart-pie'      },
-  clients:    { label: 'Clientes',   icon: 'fa-users'          },
-  tickets:    { label: 'Chamados',   icon: 'fa-tasks'          },
-  contracts:  { label: 'Contratos', icon: 'fa-file-contract'  },
-  softwares:  { label: 'Softwares', icon: 'fa-code'           },
+  dashboard:  { label: 'Dashboard',  icon: 'fa-chart-pie'             },
+  clients:    { label: 'Clientes',   icon: 'fa-users'                 },
+  tickets:    { label: 'Chamados',   icon: 'fa-tasks'                 },
+  contracts:  { label: 'Contratos', icon: 'fa-file-contract'         },
+  softwares:  { label: 'Softwares', icon: 'fa-code'                  },
+  quotes:     { label: 'Orçamentos', icon: 'fa-file-invoice-dollar'  },
 };
 
 // Rótulos de papel
@@ -95,6 +96,7 @@ const PAGE_TITLES = {
   tickets:      'Chamados',
   contracts:    'Contratos',
   softwares:    'Softwares',
+  quotes:       'Orçamentos do Site',
   employees:    'Funcionários',
   settings:     'Configurações',
   profile:      'Meu Perfil',
@@ -265,6 +267,7 @@ function setupUIForRole() {
       tickets:    'navItemTickets',
       contracts:  'navItemContracts',
       softwares:  'navItemSoftwares',
+      quotes:     'navItemQuotes',
     };
     Object.entries(permNav).forEach(([perm, id]) => {
       const el = document.getElementById(id);
@@ -299,6 +302,7 @@ function navigateTo(page) {
     tickets:      loadTicketsPage,
     contracts:    loadContractsPage,
     softwares:    loadSoftwaresPage,
+    quotes:       loadQuotesPage,
     employees:    loadEmployeesPage,
     settings:     loadSettingsPage,
     profile:      loadProfilePage,
@@ -562,6 +566,127 @@ async function loadSoftwares() {
 async function loadSoftwaresPage() {
   await loadSoftwares();
   renderSoftwaresTable(S.softwares);
+}
+
+// ================================================================
+// ORÇAMENTOS DO SITE
+// ================================================================
+let _allQuotes = [];
+
+const QUOTE_TIPO_LABELS = {
+  site:      'Site / Landing Page',
+  ecommerce: 'E-commerce',
+  app:       'Aplicativo Mobile',
+  sistema:   'Sistema Web',
+  outro:     'Outro',
+};
+
+const QUOTE_STATUS_COLORS = {
+  'novo':             '#00d9ff',
+  'em análise':       '#f6ad55',
+  'proposta enviada': '#9f7aea',
+  'fechado':          '#00ff88',
+  'cancelado':        '#fc8181',
+};
+
+async function loadQuotesPage() {
+  const body = document.getElementById('quotesBody');
+  if (body) body.innerHTML = '<tr><td colspan="8" class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>';
+
+  const { data, error } = await _supabase
+    .from('quotes')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { showToast('Erro ao carregar orçamentos: ' + error.message, 'error'); return; }
+  _allQuotes = data || [];
+  renderQuotesTable(_allQuotes);
+
+  // Badge com quantidade de novos
+  const novos = _allQuotes.filter(q => q.status === 'novo').length;
+  const badge = document.getElementById('quotesBadge');
+  if (badge) { badge.textContent = novos; badge.style.display = novos ? '' : 'none'; }
+}
+
+function renderQuotesTable(list) {
+  const body = document.getElementById('quotesBody');
+  if (!body) return;
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="8" class="table-loading">Nenhum orçamento recebido ainda.</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(q => {
+    const cor  = QUOTE_STATUS_COLORS[q.status] || '#a0aec0';
+    const tipo = QUOTE_TIPO_LABELS[q.tipo]     || q.tipo;
+    const data = new Date(q.created_at).toLocaleDateString('pt-BR');
+    return `
+    <tr>
+      <td><strong>${escHtml(q.nome)}</strong></td>
+      <td>${escHtml(q.empresa || '—')}</td>
+      <td><a href="https://wa.me/55${q.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#00d9ff">${escHtml(q.whatsapp)}</a></td>
+      <td>${escHtml(q.email)}</td>
+      <td>${escHtml(tipo)}</td>
+      <td>
+        <select class="status-select" style="background:${cor}22;color:${cor};border:1px solid ${cor}55;border-radius:6px;padding:4px 8px;font-size:0.82rem;cursor:pointer"
+          onchange="updateQuoteStatus('${q.id}', this.value)">
+          ${['novo','em análise','proposta enviada','fechado','cancelado'].map(s =>
+            `<option value="${s}" ${q.status === s ? 'selected' : ''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td>${escHtml(data)}</td>
+      <td>
+        <div class="table-actions">
+          <button class="action-btn edit" onclick="openQuoteDetail(${JSON.stringify(q).replace(/"/g,"'")})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
+          <button class="action-btn delete" onclick="askDeleteQuote('${q.id}')" title="Excluir"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterQuotes() {
+  const q   = document.getElementById('quotesSearch')?.value.toLowerCase() || '';
+  const st  = document.getElementById('quotesStatusFilter')?.value || '';
+  renderQuotesTable(_allQuotes.filter(r =>
+    (!st || r.status === st) &&
+    (!q  || r.nome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
+          || r.empresa?.toLowerCase().includes(q) || r.tipo?.toLowerCase().includes(q))
+  ));
+}
+
+async function updateQuoteStatus(id, status) {
+  const { error } = await _supabase.from('quotes').update({ status }).eq('id', id);
+  if (error) { showToast('Erro: ' + error.message, 'error'); return; }
+  const q = _allQuotes.find(r => r.id === id);
+  if (q) q.status = status;
+  showToast('Status atualizado!');
+}
+
+function openQuoteDetail(q) {
+  const tipo = QUOTE_TIPO_LABELS[q.tipo] || q.tipo;
+  const data = new Date(q.created_at).toLocaleString('pt-BR');
+  const html = `
+    <div style="display:grid;gap:12px">
+      <div><strong>Nome:</strong> ${escHtml(q.nome)}</div>
+      <div><strong>Empresa:</strong> ${escHtml(q.empresa || '—')}</div>
+      <div><strong>WhatsApp:</strong> <a href="https://wa.me/55${(q.whatsapp||'').replace(/\D/g,'')}" target="_blank" style="color:#00d9ff">${escHtml(q.whatsapp)}</a></div>
+      <div><strong>E-mail:</strong> ${escHtml(q.email)}</div>
+      <div><strong>Tipo de projeto:</strong> ${escHtml(tipo)}</div>
+      <div><strong>Recebido em:</strong> ${escHtml(data)}</div>
+      <div><strong>Descrição:</strong><br><p style="background:var(--bg-hover);padding:12px;border-radius:8px;margin-top:6px;white-space:pre-wrap">${escHtml(q.descricao)}</p></div>
+    </div>`;
+  document.getElementById('quoteDetailBody').innerHTML = html;
+  openModal('quoteDetailModal');
+}
+
+async function askDeleteQuote(id) {
+  confirmDelete('Excluir este orçamento permanentemente?', async () => {
+    const { error } = await _supabase.from('quotes').delete().eq('id', id);
+    if (error) { showToast(error.message, 'error'); return; }
+    showToast('Orçamento excluído.');
+    await loadQuotesPage();
+  });
 }
 
 function renderSoftwaresTable(list) {

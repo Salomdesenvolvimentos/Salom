@@ -82,6 +82,10 @@
         <a class="nav-item" id="navItemSoftwares" data-page="softwares" onclick="navigateTo('softwares')">
           <i class="fas fa-code"></i><span>Softwares</span>
         </a>
+        <a class="nav-item" id="navItemQuotes" data-page="quotes" onclick="navigateTo('quotes')">
+          <i class="fas fa-file-invoice-dollar"></i><span>Orçamentos</span>
+          <span class="nav-badge" id="quotesBadge" style="display:none">0</span>
+        </a>
       </div>
 
       <!-- Somente Owner -->
@@ -358,6 +362,45 @@
         </div>
       </div>
 
+      <!-- ===== ORÇAMENTOS ===== -->
+      <div id="page-quotes" class="page" style="display:none">
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="quotesSearch" placeholder="Buscar orçamentos..." oninput="filterQuotes()">
+            </div>
+            <select id="quotesStatusFilter" onchange="filterQuotes()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.9rem">
+              <option value="">Todos os status</option>
+              <option value="novo">Novo</option>
+              <option value="em análise">Em análise</option>
+              <option value="proposta enviada">Proposta enviada</option>
+              <option value="fechado">Fechado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap" style="overflow-x:auto">
+          <table class="data-table" id="quotesTable">
+            <thead>
+              <tr>
+                <th style="min-width:160px">Nome</th>
+                <th style="min-width:150px">Empresa</th>
+                <th style="min-width:140px">WhatsApp</th>
+                <th style="min-width:180px">E-mail</th>
+                <th style="min-width:130px">Tipo</th>
+                <th style="min-width:120px">Status</th>
+                <th style="min-width:130px">Recebido em</th>
+                <th style="min-width:80px" class="col-actions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="quotesBody">
+              <tr><td colspan="8" class="table-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ===== FUNCIONÁRIOS (Owner only) ===== -->
       <div id="page-employees" class="page" style="display:none">
         <div class="page-toolbar">
@@ -522,6 +565,20 @@
 </div>
 
 <!-- ===================== MODAIS ===================== -->
+
+<!-- MODAL: Detalhe do Orçamento -->
+<div id="quoteDetailModal" class="modal-overlay" onclick="overlayClose(event,'quoteDetailModal')">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-header">
+      <h3>Detalhes do Orçamento</h3>
+      <button class="modal-close" onclick="closeModal('quoteDetailModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="quoteDetailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('quoteDetailModal')">Fechar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL: Cliente -->
 <div id="clientModal" class="modal-overlay" onclick="overlayClose(event,'clientModal')">

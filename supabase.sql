@@ -278,6 +278,31 @@ INSERT INTO public.softwares (name, description, version) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ================================================================
+-- TABELA: quotes (orçamentos recebidos pelo site)
+-- ================================================================
+CREATE TABLE IF NOT EXISTS public.quotes (
+  id         UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  nome       TEXT NOT NULL,
+  empresa    TEXT,
+  whatsapp   TEXT NOT NULL,
+  email      TEXT NOT NULL,
+  tipo       TEXT NOT NULL,
+  descricao  TEXT NOT NULL,
+  status     TEXT DEFAULT 'novo' CHECK (status IN ('novo', 'em análise', 'proposta enviada', 'fechado', 'cancelado')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.quotes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "quotes_admin_all"      ON public.quotes;
+DROP POLICY IF EXISTS "quotes_insert_public"  ON public.quotes;
+-- Admin/funcionário vê tudo
+CREATE POLICY "quotes_admin_all" ON public.quotes FOR ALL
+  USING (public.current_user_role() IN ('owner', 'employee'));
+-- Qualquer pessoa (inclusive anônima) pode inserir via formulário do site
+CREATE POLICY "quotes_insert_public" ON public.quotes FOR INSERT
+  WITH CHECK (true);
+
+-- ================================================================
 -- STORAGE BUCKETS (configure no Dashboard do Supabase em Storage)
 -- ================================================================
 -- 1. Criar bucket "avatars"     → público (Public bucket)
