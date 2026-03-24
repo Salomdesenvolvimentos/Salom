@@ -259,6 +259,9 @@
               <option value="desenvolvimento">Desenvolvimento</option>
               <option value="atendimento">Atendimento</option>
             </select>
+            <select id="filterSoftware" class="filter-select" onchange="filterTickets()">
+              <option value="">Todos softwares</option>
+            </select>
           </div>
           <div class="toolbar-right">
             <button class="btn btn-outline" onclick="toggleColManager()" title="Gerenciar colunas">
@@ -546,7 +549,10 @@
               <option value="pendente">Pendente</option>
               <option value="suspenso">Suspenso</option>
               <option value="cancelado">Cancelado</option>
-              <option value="concluído">Concluído</option>
+              <option value="conclुído">Concluído</option>
+            </select>
+            <select id="myFilterSoftware" class="filter-select" onchange="filterMyTickets()">
+              <option value="">Todos softwares</option>
             </select>
           </div>
           <div class="toolbar-right">

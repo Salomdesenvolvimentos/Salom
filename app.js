@@ -781,6 +781,7 @@ async function loadTicketsPage() {
   await loadCustomCols();
   loadColState();
   await fetchTickets();
+  populateSoftwareFilter('filterSoftware');
   renderMondayGrid();
 }
 
@@ -1261,21 +1262,36 @@ async function deleteCustomCol(e, colId) {
 
 // ---- Filtros ----
 function filterTickets() {
-  const q      = document.getElementById('ticketSearch')?.value.toLowerCase() || '';
-  const status = document.getElementById('filterStatus')?.value   || '';
-  const type   = document.getElementById('filterType')?.value     || '';
+  const q        = document.getElementById('ticketSearch')?.value.toLowerCase() || '';
+  const status   = document.getElementById('filterStatus')?.value   || '';
+  const type     = document.getElementById('filterType')?.value     || '';
+  const software = document.getElementById('filterSoftware')?.value || '';
 
   _filteredTickets = _allTickets.filter(t => {
-    const matchQ = !q || t.task?.toLowerCase().includes(q) ||
+    const matchQ  = !q || t.task?.toLowerCase().includes(q) ||
       t.clients?.name?.toLowerCase().includes(q) ||
       t.softwares?.name?.toLowerCase().includes(q) ||
       String(t.id).includes(q);
-    const matchS = !status || t.status === status;
-    const matchT = !type   || t.type   === type;
-    return matchQ && matchS && matchT;
+    const matchS  = !status   || t.status        === status;
+    const matchT  = !type     || t.type          === type;
+    const matchSW = !software || String(t.software_id) === software;
+    return matchQ && matchS && matchT && matchSW;
   });
 
   renderGridBody(getActiveCols().filter(c => c.visible ? c : null), _filteredTickets);
+}
+
+function populateSoftwareFilter(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  // remove opções antigas exceto a primeira ("Todos softwares")
+  while (sel.options.length > 1) sel.remove(1);
+  S.softwares.forEach(sw => {
+    const opt = document.createElement('option');
+    opt.value = sw.id;
+    opt.textContent = sw.name;
+    sel.appendChild(opt);
+  });
 }
 
 // ---- Modal Ticket ----
@@ -1652,11 +1668,12 @@ let _myChamados = [];
 
 async function loadMyTicketsPage() {
   const { data } = await _supabase.from('tickets')
-    .select('*, softwares(name), profiles!tickets_responsible_id_fkey(name, avatar_url)')
+    .select('*, software_id, softwares(name), profiles!tickets_responsible_id_fkey(name, avatar_url)')
     .or(`created_by.eq.${S.user.id},client_id.in.(${getMyClientIds()})`)
     .order('id', { ascending: false });
 
   _myChamados = data || [];
+  populateSoftwareFilter('myFilterSoftware');
   renderChamadosList(_myChamados);
 }
 
@@ -1666,12 +1683,14 @@ function getMyClientIds() {
 }
 
 function filterMyTickets() {
-  const q      = document.getElementById('myTicketSearch')?.value.toLowerCase() || '';
-  const status = document.getElementById('myFilterStatus')?.value || '';
+  const q        = document.getElementById('myTicketSearch')?.value.toLowerCase() || '';
+  const status   = document.getElementById('myFilterStatus')?.value  || '';
+  const software = document.getElementById('myFilterSoftware')?.value || '';
   const filtered = _myChamados.filter(t => {
-    const matchQ = !q || t.task?.toLowerCase().includes(q) || String(t.id).includes(q);
-    const matchS = !status || t.status === status;
-    return matchQ && matchS;
+    const matchQ  = !q || t.task?.toLowerCase().includes(q) || String(t.id).includes(q);
+    const matchS  = !status   || t.status === status;
+    const matchSW = !software || String(t.software_id) === software;
+    return matchQ && matchS && matchSW;
   });
   renderChamadosList(filtered);
 }
