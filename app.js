@@ -127,6 +127,7 @@ const DEFAULT_COLS = [
   { key: 'status',         label: 'Status',        type: 'status',      editable: true,  width: 150 },
   { key: 'observation',    label: 'Observação',     type: 'string',      editable: true,  width: 220 },
   { key: 'responsible_id', label: 'Responsável',   type: 'responsible', editable: true,  width: 180 },
+  { key: 'requester',      label: 'Solicitante',   type: 'requester',   editable: false, width: 180 },
   { key: 'created_at',     label: 'Lançamento',    type: 'date',        editable: false, width: 120 },
   { key: 'deadline',       label: 'Prazo',         type: 'date',        editable: true,  width: 120 },
   { key: 'cost',           label: 'Custo',         type: 'money',       editable: true,  width: 120 },
@@ -929,6 +930,12 @@ function renderCellValue(ticket, col) {
     const av = rp.avatar_url || 'assets/user-generic.svg';
     return `<div class="responsible-cell"><img src="${escHtml(av)}" class="responsible-avatar" onerror="this.src='assets/user-generic.svg'"><span>${escHtml(rp.name || rp.email || '—')}</span></div>`;
   }
+  if (key === 'requester') {
+    const req = S.profiles.find(p => p.id === ticket.created_by);
+    if (!req) return '<span style="color:#6b7280">—</span>';
+    const av = req.avatar_url || 'assets/user-generic.svg';
+    return `<div class="responsible-cell"><img src="${escHtml(av)}" class="responsible-avatar" onerror="this.src='assets/user-generic.svg'"><span>${escHtml(req.name || req.email || '—')}</span></div>`;
+  }
   if (key === 'created_at') return formatDate(ticket.created_at);
   if (key === 'deadline') {
     if (!ticket.deadline) return '<span style="color:#6b7280">—</span>';
@@ -1689,6 +1696,13 @@ function renderChamadosList(list) {
            <img src="${escHtml(rp.avatar_url || 'assets/user-generic.svg')}" style="width:18px;height:18px;border-radius:50%;object-fit:cover"> ${escHtml(rp.name || 'Responsável')}
          </span>`
       : '';
+    const reqProfile = S.profiles.find(p => p.id === t.created_by);
+    const reqHtml = reqProfile
+      ? `<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#b0b8d4" title="Solicitante">
+           <img src="${escHtml(reqProfile.avatar_url || 'assets/user-generic.svg')}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;border:1px solid #00c875">
+           <span style="color:#00c875">${escHtml(reqProfile.name || reqProfile.email || 'Solicitante')}</span>
+         </span>`
+      : '';
 
     return `<div class="chamado-card" onclick="showTicketDetail(${t.id})">
       <div class="chamado-card-header">
@@ -1700,6 +1714,7 @@ function renderChamadosList(list) {
       ${t.observation ? `<div class="chamado-obs">${escHtml(t.observation)}</div>` : ''}
       <div class="chamado-footer">
         ${t.softwares?.name ? `<span class="badge badge-dev"><i class="fas fa-code"></i> ${escHtml(t.softwares.name)}</span>` : ''}
+        ${reqHtml}
         ${rpHtml}
         ${t.deadline ? `<span style="font-size:12px;color:${daysUntil(t.deadline) < 0 ? '#e2445c' : '#b0b8d4'}"><i class="fas fa-calendar"></i> ${formatDate(t.deadline)}</span>` : ''}
         <span class="chamado-date">${formatDate(t.created_at)}</span>
