@@ -32,6 +32,20 @@ try {
 } catch (_) { /* service key não configurada */ }
 
 // ================================================================
+// KEEP-ALIVE — ping a cada 5 minutos para manter o Supabase ativo
+// ================================================================
+(function startKeepAlive() {
+  const INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
+  setInterval(async () => {
+    if (!_supabase) return;
+    try {
+      // Consulta leve: busca 1 linha da tabela profiles
+      await _supabase.from('profiles').select('id').limit(1);
+    } catch (_) { /* silencioso — não interromper o app */ }
+  }, INTERVAL_MS);
+})();
+
+// ================================================================
 // ESTADO GLOBAL
 // ================================================================
 const S = {
