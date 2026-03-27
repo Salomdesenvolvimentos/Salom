@@ -244,15 +244,23 @@
               <i class="fas fa-search"></i>
               <input type="text" id="ticketSearch" placeholder="Buscar chamados..." oninput="filterTickets()">
             </div>
-            <select id="filterStatus" class="filter-select" onchange="filterTickets()">
+            <select id="filterStatus" class="filter-select" onchange="filterTickets()" style="display:none">
               <option value="">Todos status</option>
-              <option value="não iniciado">Não Iniciado</option>
-              <option value="em andamento">Em Andamento</option>
-              <option value="pendente">Pendente</option>
-              <option value="suspenso">Suspenso</option>
-              <option value="cancelado">Cancelado</option>
-              <option value="concluído">Concluído</option>
             </select>
+            <div class="status-filter-wrap" id="statusFilterWrap">
+              <button type="button" class="filter-select status-filter-btn" id="statusFilterBtn" onclick="toggleStatusDropdown(event)">
+                <span id="statusFilterLabel">Todos status</span> <i class="fas fa-chevron-down" style="font-size:10px;margin-left:4px"></i>
+              </button>
+              <div class="status-filter-dropdown" id="statusFilterDropdown">
+                <label class="status-filter-option"><input type="checkbox" value="não iniciado" onchange="onStatusFilterChange()"> <span class="status-dot" style="background:#6e7c8d"></span> Não Iniciado</label>
+                <label class="status-filter-option"><input type="checkbox" value="em andamento" onchange="onStatusFilterChange()"> <span class="status-dot" style="background:#0073ea"></span> Em Andamento</label>
+                <label class="status-filter-option"><input type="checkbox" value="pendente"     onchange="onStatusFilterChange()"> <span class="status-dot" style="background:#f2a900"></span> Pendente</label>
+                <label class="status-filter-option"><input type="checkbox" value="suspenso"    onchange="onStatusFilterChange()"> <span class="status-dot" style="background:#ff7d45"></span> Suspenso</label>
+                <label class="status-filter-option"><input type="checkbox" value="cancelado"   onchange="onStatusFilterChange()"> <span class="status-dot" style="background:#e2445c"></span> Cancelado</label>
+                <label class="status-filter-option"><input type="checkbox" value="concluído"   onchange="onStatusFilterChange()"> <span class="status-dot" style="background:#00c875"></span> Concluído</label>
+                <div class="status-filter-clear"><button type="button" onclick="clearStatusFilter()">Limpar</button></div>
+              </div>
+            </div>
             <select id="filterType" class="filter-select" onchange="filterTickets()">
               <option value="">Todos tipos</option>
               <option value="bug">Bug</option>

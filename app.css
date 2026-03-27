@@ -676,6 +676,73 @@
 .filter-select:focus { border-color: var(--primary-color, #00ff88); }
 .filter-select option { background: #131829; }
 
+/* ---- Multi-select status filter ---- */
+.status-filter-wrap {
+  position: relative;
+  display: inline-block;
+}
+.status-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.status-filter-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 500;
+  background: #1a2035;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 8px 0;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.status-filter-dropdown.open { display: block; }
+.status-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: #b0b8d4;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.status-filter-option:hover { background: rgba(255,255,255,0.06); }
+.status-filter-option input[type="checkbox"] {
+  accent-color: #00ff88;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-filter-clear {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-top: 6px;
+  padding: 6px 14px 0;
+}
+.status-filter-clear button {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+.status-filter-clear button:hover { color: #e2445c; }
+
 /* ================================================================
    BUTTONS
 ================================================================ */

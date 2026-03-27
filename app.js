@@ -189,6 +189,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sp && !sp.contains(e.target) && !e.target.closest('.status-badge')) {
       sp.style.display = 'none';
     }
+    if (!e.target.closest('#statusFilterWrap')) {
+      document.getElementById('statusFilterDropdown')?.classList.remove('open');
+    }
   });
 });
 
@@ -1287,9 +1290,38 @@ async function deleteCustomCol(e, colId) {
 }
 
 // ---- Filtros ----
+function getActiveStatusFilters() {
+  return [...document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]:checked')].map(i => i.value);
+}
+
+function toggleStatusDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('statusFilterDropdown').classList.toggle('open');
+}
+
+function onStatusFilterChange() {
+  updateStatusFilterLabel();
+  filterTickets();
+}
+
+function updateStatusFilterLabel() {
+  const checked = getActiveStatusFilters();
+  const label = document.getElementById('statusFilterLabel');
+  if (!label) return;
+  if (!checked.length) label.textContent = 'Todos status';
+  else if (checked.length === 1) label.textContent = STATUS_CFG[checked[0]]?.label || checked[0];
+  else label.textContent = `${checked.length} status selecionados`;
+}
+
+function clearStatusFilter() {
+  document.querySelectorAll('#statusFilterDropdown input[type="checkbox"]').forEach(i => i.checked = false);
+  updateStatusFilterLabel();
+  filterTickets();
+}
+
 function filterTickets() {
   const q        = document.getElementById('ticketSearch')?.value.toLowerCase() || '';
-  const status   = document.getElementById('filterStatus')?.value   || '';
+  const statuses = getActiveStatusFilters();
   const type     = document.getElementById('filterType')?.value     || '';
   const software = document.getElementById('filterSoftware')?.value || '';
 
@@ -1298,7 +1330,7 @@ function filterTickets() {
       t.clients?.name?.toLowerCase().includes(q) ||
       t.softwares?.name?.toLowerCase().includes(q) ||
       String(t.id).includes(q);
-    const matchS  = !status   || t.status        === status;
+    const matchS  = !statuses.length || statuses.includes(t.status);
     const matchT  = !type     || t.type          === type;
     const matchSW = !software || String(t.software_id) === software;
     return matchQ && matchS && matchT && matchSW;
@@ -1544,6 +1576,16 @@ function openContractModal(id) {
   openModal('contractModal');
 }
 
+async function ensureContractsBucket() {
+  try {
+    const client = _supabaseAdmin || _supabase;
+    const { error } = await client.storage.getBucket('contracts');
+    if (error) {
+      await client.storage.createBucket('contracts', { public: false });
+    }
+  } catch (_) { /* silencioso */ }
+}
+
 function onContractFileChange(e) {
   _selectedFile = e.target.files[0] || null;
   if (_selectedFile) {
@@ -1562,6 +1604,7 @@ async function saveContract(e) {
   if (_selectedFile) {
     const ext  = _selectedFile.name.split('.').pop();
     const path = `contracts/${Date.now()}.${ext}`;
+    await ensureContractsBucket();
     const { error: upErr } = await _supabase.storage.from('contracts').upload(path, _selectedFile);
     if (upErr) { showToast('Erro no upload: ' + upErr.message, 'error'); return; }
 
