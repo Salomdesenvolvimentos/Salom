@@ -153,6 +153,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   _supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN'  && session) await onSignedIn(session.user);
     if (event === 'SIGNED_OUT')              showLogin();
+    if (event === 'TOKEN_REFRESHED' && session && S.user) {
+      // Reconectar realtime após refresh do token
+      if (S.realtimeCh) {
+        _supabase.removeChannel(S.realtimeCh);
+        S.realtimeCh = null;
+      }
+      const isStaff = ['owner', 'employee', 'admin'].includes(S.profile?.role);
+      if (isStaff) subscribeRealtime();
+    }
+  });
+
+  // Reconectar ao retornar de aba em segundo plano
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible' || !S.user) return;
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { showLogin(); return; }
+    // Reconectar realtime se desconectado
+    if (!S.realtimeCh) {
+      const isStaff = ['owner', 'employee', 'admin'].includes(S.profile?.role);
+      if (isStaff) subscribeRealtime();
+    }
+    // Recarregar página atual para sincronizar dados
+    if (typeof navigateTo === 'function' && S.currentPage) {
+      navigateTo(S.currentPage);
+    }
   });
 
   // Fechar dropdowns clicando fora
@@ -940,9 +965,10 @@ function renderCellValue(ticket, col) {
   if (key === 'created_at') return formatDate(ticket.created_at);
   if (key === 'deadline') {
     if (!ticket.deadline) return '<span style="color:#6b7280">—</span>';
+    const done = ticket.status === 'concluído' || ticket.status === 'cancelado';
     const days = daysUntil(ticket.deadline);
-    const color = days < 0 ? '#e2445c' : days <= 3 ? '#f2a900' : '#b0b8d4';
-    return `<span style="color:${color}">${formatDate(ticket.deadline)}${days < 0 ? ' ⚠' : ''}</span>`;
+    const color = !done && days < 0 ? '#e2445c' : !done && days <= 3 ? '#f2a900' : '#b0b8d4';
+    return `<span style="color:${color}">${formatDate(ticket.deadline)}${!done && days < 0 ? ' ⚠' : ''}</span>`;
   }
   if (key === 'cost')    return ticket.cost != null ? formatMoney(ticket.cost) : '<span style="color:#6b7280">—</span>';
   if (key === 'task')    return `<span style="font-weight:500">${escHtml(ticket.task || '—')}</span>`;
