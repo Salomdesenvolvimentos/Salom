@@ -1577,13 +1577,25 @@ function openContractModal(id) {
 }
 
 async function ensureContractsBucket() {
-  try {
-    const client = _supabaseAdmin || _supabase;
-    const { error } = await client.storage.getBucket('contracts');
-    if (error) {
-      await client.storage.createBucket('contracts', { public: false });
-    }
-  } catch (_) { /* silencioso */ }
+  // Verificar se o bucket existe
+  const { data: buckets, error: listErr } = await _supabase.storage.listBuckets();
+  if (!listErr) {
+    const exists = (buckets || []).some(b => b.name === 'contracts');
+    if (exists) return; // já existe, ok
+  }
+
+  // Tentar criar via service key (admin), se disponível
+  const admin = _supabaseAdmin;
+  if (admin) {
+    const { error: createErr } = await admin.storage.createBucket('contracts', { public: false });
+    if (!createErr) return; // criado com sucesso
+  }
+
+  // Bucket não existe e não foi possível criar automaticamente
+  throw new Error(
+    'O bucket "contracts" não existe no Supabase Storage. ' +
+    'Acesse o painel do Supabase → Storage → New bucket → nome: contracts.'
+  );
 }
 
 function onContractFileChange(e) {
@@ -1604,7 +1616,12 @@ async function saveContract(e) {
   if (_selectedFile) {
     const ext  = _selectedFile.name.split('.').pop();
     const path = `contracts/${Date.now()}.${ext}`;
-    await ensureContractsBucket();
+    try {
+      await ensureContractsBucket();
+    } catch (bucketErr) {
+      showToast(bucketErr.message, 'error');
+      return;
+    }
     const { error: upErr } = await _supabase.storage.from('contracts').upload(path, _selectedFile);
     if (upErr) { showToast('Erro no upload: ' + upErr.message, 'error'); return; }
 
